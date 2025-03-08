@@ -5,7 +5,7 @@ import re
 class PromptKind(Enum):
     BUGGY = "trigger a bug"
     FIXED = "does not trigger a bug but is useful for regression testing"
-    SIMILAR = "similar to existing test cases and does not trigger a bug"
+    SIMILAR = "similar to MUT TESTS and does not trigger a bug"
 
     def get_prompt_filename_pattern(self, version):
         return re.compile(

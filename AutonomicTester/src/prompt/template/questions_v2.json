@@ -1,7 +1,7 @@
 [
-    "Is MONITORED SCENARIO a similar scenario compared with EXISTING TEST CASES?",
-    "Will FUNCTION CANDIDATE work differently when executing under MONITORED SCENARIO?",
-    "Will FUNCTION CANDIDATE raise any runtime error or exception when executing under MONITORED SCENARIO?",
-    "Does FUNCTION CANDIDATE still produce correct results when executing under MONITORED SCENARIO?",
-    "Will MONITORED SCENARIO reveal any bug in FUNCTION CANDIDATE? If YES, which line of code is buggy?"
+    "Is MUT INPUT a similar scenario compared with MUT TESTS?",
+    "Will MUT work differently when executing under MUT INPUT?",
+    "Will MUT raise any runtime error or exception when executing under MUT INPUT?",
+    "Does MUT still produce correct results when executing under MUT INPUT?",
+    "Will MUT INPUT reveal any bug in MUT? If YES, which line of code is buggy?"
 ]

@@ -93,13 +93,13 @@ class Prompt:
             template_json = json.load(f)
         task = template_json["task"]
         prompt = f"""
-FUNCTION CANDIDATE:
+MUT:
 {function_candidate}
 
-EXISTING TEST CASES:
+MUT TESTS:
 {existing_test_cases}
 
-MONITORED SCENARIO:
+MUT INPUT:
 {new_scenario}
 
 TASK:
