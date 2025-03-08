@@ -11,6 +11,7 @@ AutonomicTester/experiment_results/*
 FineTuneDataset/
 PromptDataset/
 FastDataset/
+GitHubDataset/
 
 images/
 plotdata/
