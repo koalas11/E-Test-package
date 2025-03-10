@@ -1,14 +1,15 @@
-ollama
-matplotlib
-openai
-nltk
-pandas
-tiktoken
-jsonlines
-ipykernel
-transformers
-scikit-learn
-javalang
-llama-index
-llama-index-llms-ollama
-ipywidgets
+ollama == 0.4.7
+matplotlib == 3.10.1
+openai == 1.65.2
+nltk == 3.9.1
+pandas == 2.2.3
+tiktoken == 0.9.0
+jsonlines == 4.0.0
+ipykernel == 6.29.5
+transformers == 4.49.0
+scikit-learn == 1.6.1
+javalang == 0.13.0
+llama-index == 0.12.22
+llama-index-llms-ollama == 0.5.2
+llama-index-llms-openai == 0.3.25
+ipywidgets == 8.1.5
