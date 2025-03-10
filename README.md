@@ -30,7 +30,7 @@ bash extract_archives.sh
 ## Getting Started
 
 ### Data Analysis
-To reproduce evaluation results shown in the paper, please run notebooks directly with the created `.venv` as the kernel.
+To reproduce evaluation results shown in the paper, please run notebooks in `DataAnalysis` folder directly with the created `.venv` as the kernel.
 - `Dataset Stats.ipynb` computes statistics about the dataset of prompts, which corresponds to **Section 3.2.1 Dataset** in the paper.
 - `RQ1 Impact of LLMs.ipynb` computes evaluation metrics (precision, recall, and F1-score) for each scenario and the average F1-score, which corresponds to **Section 4.1 RQ1: Impact of LLMs**, **Table 2** and **Figure 2** in the paper.
 - `RQ2 Comparative Evaluation.ipynb` computes evaluation metrics of two state-of-the-art approaches (i.e., *FAST++* and *Field-ready testing*), which corresponds to **Section 4.2 RQ2: Comparative Evaluation** and **Table 2** in the paper.
