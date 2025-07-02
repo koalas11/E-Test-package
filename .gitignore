@@ -20,3 +20,4 @@ DataAnalysis/GitHubRepos
 
 # Environment files
 .venv
+.vscode

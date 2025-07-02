@@ -41,13 +41,10 @@ def summarize_prompt_statistics_for_defects4j(version):
 
 
 def analyze_answers_from_summary(experiment_folder, prompt_version, queries, path):
-    true_scenario = experiment_folder.split("_")[-1]
     answer_fn = f"answers_v{prompt_version}.json"
     with open(os.path.join(PROMPT_TEMPLATE_PATH, answer_fn)) as answer_file:
         answers = json.load(answer_file)
-    with open(
-        os.path.join(path, experiment_folder, "summary.json")
-    ) as f:
+    with open(os.path.join(path, experiment_folder, "summary.json")) as f:
         results = json.load(f)
 
     # Vote for category using the number of correct results for 3 scenarios
@@ -56,16 +53,17 @@ def analyze_answers_from_summary(experiment_folder, prompt_version, queries, pat
     for result in results:
         result_id = result["id"]
         matched_prompt = re.search(
-            r"prompt_(?:buggy|fixed|similar)_(\d+)_([-A-Za-z]+)_v\d+_result.txt",
+            r"prompt_(buggy|fixed|similar)_(\d+)_([-A-Za-z]+)_v\d+_result.txt",
             result_id,
         )
         if not matched_prompt:
             print(f"Fail to match result file name: {result_id}!")
             continue
-        bug_id = int(matched_prompt.group(1))
-        project = matched_prompt.group(2)
+        true_scenario = matched_prompt.group(1)
+        bug_id = int(matched_prompt.group(2))
+        project = matched_prompt.group(3)
         # Encode answers with 0 meaning incorrect and 1 meaning correct
-        encoded_answer = {"bug id": bug_id, "project": project}
+        encoded_answer = {"bug id": bug_id, "project": project, "truth": true_scenario}
         true_answers = {q: answers[true_scenario.upper()][q] for q in queries}
         for question_id, answer in true_answers.items():
             if question_id in result and result[question_id] == answer:
@@ -75,7 +73,7 @@ def analyze_answers_from_summary(experiment_folder, prompt_version, queries, pat
         encoded_answers.append(encoded_answer)
 
         # Voting
-        vote = {"bug id": bug_id, "project": project}
+        vote = {"bug id": bug_id, "project": project, "truth": true_scenario}
         # Compute the number of correct results for each scenario
         for scenario in [p.name.lower() for p in PromptKind]:
             vote[scenario] = 0

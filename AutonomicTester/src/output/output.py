@@ -11,10 +11,16 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 from src.llm.llm_kind import LLMKind
 from src.prompt.prompt_kind import PromptKind
-from src import EXPERIMENT_RESULTS_PATH, PROMPT_TEMPLATE_PATH, FINE_TUNE_LLM_VALIDATION_PATH
+from src import (
+    EXPERIMENT_RESULTS_PATH,
+    PROMPT_TEMPLATE_PATH,
+    FINE_TUNE_LLM_VALIDATION_PATH,
+)
 
 
-def create_experiment_folder(model: LLMKind, scenario, dataset, timestamp, use_rag: bool = False):
+def create_experiment_folder(
+    model: LLMKind, scenario, dataset, timestamp, use_rag: bool = False
+):
     """
     Create a folder to store the experiment results.
 
@@ -27,9 +33,7 @@ def create_experiment_folder(model: LLMKind, scenario, dataset, timestamp, use_r
         folder_name = f"{timestamp}_RAG_{model.value}_{dataset}_{scenario.name.lower()}"
     else:
         folder_name = f"{timestamp}_{model.value}_{dataset}_{scenario.name.lower()}"
-    folder_path = os.path.join(
-        EXPERIMENT_RESULTS_PATH, folder_name
-    )
+    folder_path = os.path.join(EXPERIMENT_RESULTS_PATH, folder_name)
     # Create the directory
     os.makedirs(folder_path, exist_ok=True)
     return folder_path
@@ -234,7 +238,7 @@ def plot_results_from_summary(experiment_folder, prompt_version, plot_table):
     # plt.show(block=False)
 
 
-def summarize_results(directory, version, path, is_validation = False):
+def summarize_results(directory, version, path, is_validation=False):
     results = []
     # read prompts for validation
     with open(FINE_TUNE_LLM_VALIDATION_PATH) as f:
@@ -252,9 +256,12 @@ def summarize_results(directory, version, path, is_validation = False):
                 pattern = r"{(\s*\"Q\d\":\s*\".*?\",?\s*)+}"
                 match = re.search(pattern, result)
                 if match:
-                    result = json.loads(match.group(0))
-                    result["id"] = fn
-                    results.append(result)
+                    try:
+                        result = json.loads(match.group(0))
+                        result["id"] = fn
+                        results.append(result)
+                    except:
+                        print("Fail to parse to json", fn)
             elif version in ["2", "3"]:
                 pattern = r"\[ANSWER\][^\[]*(YES|NO)[^\[]*\[\/ANSWER\]"
                 matches = re.findall(pattern, result)
@@ -271,9 +278,7 @@ def summarize_results(directory, version, path, is_validation = False):
                     )
             else:
                 raise ValueError(f"Illegal prompt template version {version}!")
-    with open(
-        os.path.join(path, directory, "summary.json"), "w"
-    ) as f:
+    with open(os.path.join(path, directory, "summary.json"), "w") as f:
         f.write(json.dumps(results, sort_keys=True, indent=4))
 
 

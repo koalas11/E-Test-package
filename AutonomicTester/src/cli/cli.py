@@ -171,8 +171,8 @@ parser_summarize = subparsers.add_parser(
 parser_summarize.add_argument(
     "-e",
     "--experiment",
-    help=f"a target experiment folder in AutonomicTester/experiment_results/ to summarize results",
-    default="",
+    help=f"the name of an experiment folder",
+    default=None,
 )
 parser_summarize.add_argument(
     "--validation",

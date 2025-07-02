@@ -76,15 +76,19 @@ def summarize_answers(args):
     is_validation = args.validation
     experiment_folder = args.experiment
 
-    if experiment_folder != "":
+    # suffixes = ["buggy", "fixed", "similar", "all"]
+    # pattern = re.compile(r"^\d{8}_\d{6}_.*_(%s)$" % "|".join(suffixes))
+
+    if experiment_folder is not None:
         # summarize 1 experiment in the path
         summarize_results(experiment_folder, version, path)
         analyze_answers_from_summary(experiment_folder, version, queries, path)
     else:
         # summarize all experiments in the path
-        for experiment in os.listdir(path):
-            if not os.path.isdir(os.path.join(path, experiment)):
-                continue
-            print(f"Summarize experiment {experiment}")
-            summarize_results(experiment, version, path, is_validation)
-            analyze_answers_from_summary(experiment, version, queries, path)
+        for dirpath, dirnames, _ in os.walk(path):
+            for dirname in dirnames:
+                experiment_path = os.path.join(dirpath, dirname)
+                if "arguments.json" in os.listdir(experiment_path):
+                    print(f"Summarize experiment {experiment_path}")
+                    summarize_results(dirname, version, dirpath, is_validation)
+                    analyze_answers_from_summary(dirname, version, queries, dirpath)
