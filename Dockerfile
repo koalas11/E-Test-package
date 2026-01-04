@@ -17,7 +17,7 @@ ENV TZ=America/Los_Angeles
 RUN apt-get update && apt-get install curl tar -y
 
 # Install Ollama only if enabled
-ARG OLLAMA_INSTALL=false
+ARG OLLAMA_INSTALL=true
 RUN if [ "$OLLAMA_INSTALL" = "true" ]; then \
         curl -fsSL https://ollama.com/install.sh | sh; \
     else \
@@ -59,14 +59,17 @@ ENV PATH="/defects4j/framework/bin:$VIRTUAL_ENV/bin:$PATH"
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY Archives/dataset Archives/dataset
+COPY Archives Archives
 COPY AutonomicTester AutonomicTester
 COPY DataAnalysis DataAnalysis
 COPY extract_archives.sh .
+RUN dos2unix extract_archives.sh && \
+    chmod +x extract_archives.sh
 
 # Setup the entrypoint script
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN dos2unix /entrypoint.sh && \
+    chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 # Open a bash shell to run the specific Python commands manually

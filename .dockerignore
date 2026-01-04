@@ -1,7 +1,5 @@
-Archives/results
 .git
 *.pyc
-
 
 # MAC files
 .DS_Store

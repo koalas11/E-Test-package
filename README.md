@@ -44,12 +44,26 @@ docker tag e-test-env-llama3-1b-amd64 e-test-env
 ```
 
 **Step 2. Run the Docker container**
+
+Linux/Mac:
 ```sh
 docker run -it --rm \
   -p 20268:8888 \
-  -v $(pwd):/app \
+  -v $(pwd)/experiment_results:/app/AutonomicTester/experiment_results \
+  -v $(pwd)/logs:/app/logs \
   -e HUGGING_FACE_API_KEY=$HUGGING_FACE_API_KEY \
   -e OLLAMA_MODEL="llama3.2:1b" \
+  e-test-env
+```
+
+Windows:
+```sh
+docker run -it --rm ^
+  -p 20268:8888 ^
+  -v "%cd%\experiment_results":/app/AutonomicTester/experiment_results ^
+  -v "%cd%\logs":/app/logs ^
+  -e HUGGING_FACE_API_KEY=%HUGGING_FACE_API_KEY% ^
+  -e OLLAMA_MODEL="llama3.2:1b" ^
   e-test-env
 ```
 
@@ -70,6 +84,9 @@ In the Docker interactive shell, run the following command to launch an experime
 ```sh
 # Test Llama3 1B with prompts generated from error-prone scenarios in Defects4J
 python AutonomicTester/main.py prompt -v 4 -d Defects4J -m LLama3_2_1B -s BUGGY
+
+# Test Llama3 1B with prompts generated from error-prone scenarios in Defects4J with Test Case Generation On
+python AutonomicTester/main.py prompt -v 4 -d Defects4J -m LLama3_2_1B -s BUGGY -tcg on
 ```
 
 For other settings mentioned in the paper, please check the help message via `python AutonomicTester/main.py -h`.
