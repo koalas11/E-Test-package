@@ -2,26 +2,30 @@
 
 model=${OLLAMA_MODEL}
 
-bash /app/extract_archives.sh
+bash /app/extract_archives.sh dataset
 
-# Start Ollama in the background
-echo "Starting Ollama server..."
-nohup ollama serve > ollama.log 2>&1 &
+# Start Ollama in the background only if installed
+if command -v ollama >/dev/null 2>&1; then
+    echo "Starting Ollama server..."
+    nohup ollama serve > ollama.log 2>&1 &
 
-# Wait for the Ollama server to wake up
-echo "Waiting for Ollama to be ready..."
-until curl -s http://localhost:11434/api/version > /dev/null; do
-    sleep 2
-    echo "..."
-done
+    # Wait for the Ollama server to wake up
+    echo "Waiting for Ollama to be ready..."
+    until curl -s http://localhost:11434/api/version > /dev/null; do
+        sleep 2
+        echo "..."
+    done
 
-# Pull the LLM
-# This checks if the model exists to save time on restarts if using volumes
-if ! ollama list | grep -q "$model"; then
-    echo "Pulling $model model (this may take a while)..."
-    ollama pull "$model"
+    # Pull the LLM
+    # This checks if the model exists to save time on restarts if using volumes
+    if ! ollama list | grep -q "$model"; then
+        echo "Pulling $model model (this may take a while)..."
+        ollama pull "$model"
+    else
+        echo "$model model already present."
+    fi
 else
-    echo "$model model already present."
+    echo "Ollama is not installed. Skipping Ollama startup, you will need to specify your ollama host."
 fi
 
 # Activate the virtual environment explicitly (safety measure)

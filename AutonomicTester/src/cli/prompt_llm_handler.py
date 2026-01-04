@@ -47,6 +47,7 @@ class PromptLlmHandler:
         self.temperature = float(args.temperature)
         self.num_shots = int(args.few_shots)
         self.response_output_format = args.format
+        self.enable_tcg = args.test_case_generation == "on"
         self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         # Extract prompt paths
         self.prompt_paths = extract_prompt_paths(
@@ -142,7 +143,7 @@ class PromptLlmHandler:
                 model=self.chosen_llm.get_intenal_model_name(),
                 messages=chat_msgs,
                 options={
-                    "seed": 27,
+                    "seed": self.seed,
                     "temperature": self.temperature,
                     "num_ctx": self.chosen_llm.get_context_limit(),
                 },
@@ -158,7 +159,7 @@ class PromptLlmHandler:
             return response.content
 
     def _prompt_llama_model(
-        self, messages, bug_id, project_id, prompt_stats: dict, enable_tcg: bool
+        self, messages, bug_id, project_id, prompt_stats: dict
     ):
         scenario_response = self.client.chat(
             model=self.chosen_llm.get_intenal_model_name(),
@@ -176,7 +177,7 @@ class PromptLlmHandler:
         num_tokens = scenario_response["prompt_eval_count"]
         response = scenario_response["message"]["content"]
         # continue conversation with test case generation
-        if enable_tcg:
+        if self.enable_tcg:
             chat_msgs = messages + [scenario_response["message"], self.tcg_msg]
             generated_test_case = self._check_validity(
                 chat_msgs, bug_id, project_id, prompt_stats
@@ -187,7 +188,7 @@ class PromptLlmHandler:
             return response, None, num_tokens
 
     def _prompt_gpt_model(
-        self, messages, bug_id, project_id, prompt_stats: dict, enable_tcg: bool
+        self, messages, bug_id, project_id, prompt_stats: dict
     ):
         # Measure the time taken to process each prompt
         t_init = time.time_ns()
@@ -201,7 +202,7 @@ class PromptLlmHandler:
         prompt_stats["elapsed_nanoseconds"] = elapsed_nanoseconds
         generated_test_case = None
         # continue conversation with test case generation
-        if enable_tcg:
+        if self.enable_tcg:
             chat_msgs = messages + [
                 {"role": "assistant", "content": response_msg.content},
                 self.tcg_msg,
@@ -349,11 +350,11 @@ class PromptLlmHandler:
             try:
                 if self.chosen_llm.is_gpt_model():
                     response, tcg_response = self._prompt_gpt_model(
-                        messages, bug_id, project_id, prompt_stats, False
+                        messages, bug_id, project_id, prompt_stats
                     )
                 elif self.chosen_llm.is_ollama_model():
                     response, tcg_response, num_tokens = self._prompt_llama_model(
-                        messages, bug_id, project_id, prompt_stats, False
+                        messages, bug_id, project_id, prompt_stats
                     )
             except Exception as e:
                 print(e)
