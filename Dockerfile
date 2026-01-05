@@ -26,7 +26,7 @@ RUN if [ "$OLLAMA_INSTALL" = "true" ]; then \
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        curl git unzip dos2unix \
+        curl git unzip \
         subversion perl perl-modules perl-base build-essential libperl-dev cpanminus \
         openjdk-11-jre-headless \
         python3.13 python3.13-venv python3-pip && \
@@ -40,7 +40,6 @@ RUN git clone https://github.com/rjust/defects4j.git defects4j && \
 
 WORKDIR /defects4j
 RUN cpanm --installdeps . && \
-    dos2unix ./init.sh && \
     chmod +x ./init.sh && \
     ./init.sh && \
     cd project_repos && \
@@ -63,13 +62,11 @@ COPY Archives Archives
 COPY AutonomicTester AutonomicTester
 COPY DataAnalysis DataAnalysis
 COPY extract_archives.sh .
-RUN dos2unix extract_archives.sh && \
-    chmod +x extract_archives.sh
+RUN chmod +x extract_archives.sh
 
 # Setup the entrypoint script
 COPY entrypoint.sh /entrypoint.sh
-RUN dos2unix /entrypoint.sh && \
-    chmod +x /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 # Open a bash shell to run the specific Python commands manually

@@ -11,14 +11,14 @@ FINE_TUNE_SUFFIX = "defects4j-20"
 FINE_TUNE_NUM_EPOCHS = 3
 
 
-def prompt_gpt(model, messages, temperature):
+def prompt_gpt(model, messages, seed, temperature):
     """
     Function to call the ChatGPT API and return the response.
     """
     client = OpenAI(timeout=300)
     response = client.chat.completions.create(
         model=model,
-        seed=27,
+        seed=seed,
         messages=messages,
         temperature=temperature,
         max_tokens=800,

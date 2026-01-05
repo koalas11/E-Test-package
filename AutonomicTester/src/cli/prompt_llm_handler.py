@@ -154,6 +154,7 @@ class PromptLlmHandler:
             response = prompt_gpt(
                 self.chosen_llm.get_intenal_model_name(),
                 chat_msgs,
+                self.seed,
                 self.temperature,
             )
             return response.content
