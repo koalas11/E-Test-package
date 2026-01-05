@@ -1,8 +1,9 @@
 #!/bin/bash
 
 model=${OLLAMA_MODEL}
+EXTRACT_TARGET="${1:-all}"
 
-bash /app/extract_archives.sh all
+bash /app/extract_archives.sh "$EXTRACT_TARGET"
 
 mkdir -p /app/logs
 

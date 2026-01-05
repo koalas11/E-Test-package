@@ -1,8 +1,4 @@
-FROM ubuntu:26.04
-
-# Arguments
-# You can override this with -e OLLAMA_MODEL="..." in docker run
-ENV OLLAMA_MODEL="llama3.2:1b"
+FROM ubuntu:26.04 AS base
 
 ARG DEFECTS4J_COMMIT=8022adcd685ae8f591f0cb5d71282e5c93798e4d
 
@@ -14,19 +10,9 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV TZ=America/Los_Angeles
 
 # Install system dependencies
-RUN apt-get update && apt-get install curl tar -y
-
-# Install Ollama only if enabled
-ARG OLLAMA_INSTALL=true
-RUN if [ "$OLLAMA_INSTALL" = "true" ]; then \
-        curl -fsSL https://ollama.com/install.sh | sh; \
-    else \
-        echo "Ollama installation skipped (OLLAMA_INSTALL=$OLLAMA_INSTALL)"; \
-    fi
-
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        curl git unzip \
+        curl git tar \
         subversion perl perl-modules perl-base build-essential libperl-dev cpanminus \
         openjdk-11-jre-headless \
         python3.13 python3.13-venv python3-pip && \
@@ -46,7 +32,6 @@ RUN cpanm --installdeps . && \
     rm -rf defects4j-repos-v3.zip
 
 WORKDIR /app
-
 # Create a Python virtual environment
 ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV
@@ -58,16 +43,40 @@ ENV PATH="/defects4j/framework/bin:$VIRTUAL_ENV/bin:$PATH"
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY Archives Archives
-COPY AutonomicTester AutonomicTester
-COPY DataAnalysis DataAnalysis
-COPY extract_archives.sh .
-RUN chmod +x extract_archives.sh
-
 # Setup the entrypoint script
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY extract_archives.sh .
+RUN chmod +x extract_archives.sh && \
+    chmod +x /entrypoint.sh
 
-ENTRYPOINT ["/entrypoint.sh"]
+# Arguments
+# You can override this with -e OLLAMA_MODEL="..." in docker run
+ENV OLLAMA_MODEL="llama3.2:1b"
+
+# Install Ollama only if enabled
+ARG OLLAMA_INSTALL=true
+RUN if [ "$OLLAMA_INSTALL" = "true" ]; then \
+        curl -fsSL https://ollama.com/install.sh | sh; \
+    else \
+        echo "Ollama installation skipped (OLLAMA_INSTALL=$OLLAMA_INSTALL)"; \
+    fi
+
+COPY AutonomicTester AutonomicTester
+COPY DataAnalysis DataAnalysis
+
 # Open a bash shell to run the specific Python commands manually
 CMD ["/bin/bash"]
+
+FROM base AS no_results
+
+WORKDIR /app
+COPY Archives/dataset Archives/dataset
+
+ENTRYPOINT ["/entrypoint.sh no_results"]
+
+FROM base AS with_results
+
+WORKDIR /app
+COPY Archives Archives
+
+ENTRYPOINT ["/entrypoint.sh all"]

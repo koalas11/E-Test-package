@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage: ./extract_archives.sh [all|dataset|results|plotdata|github]
+# Usage: ./extract_archives.sh [all|dataset|results|plotdata|github|no_results]
 # Default is 'all'
 
 RESULTS_DIR="AutonomicTester/experiment_results"
@@ -85,9 +85,14 @@ case "$EXTRACT_TARGET" in
     github)
         extract_github
         ;;
+    no_results)
+        extract_dataset
+        extract_plotdata
+        extract_github
+        ;;
     *)
         echo "Unknown extraction target: $EXTRACT_TARGET"
-        echo "Usage: $0 [all|dataset|results|plotdata|github]"
+        echo "Usage: $0 [all|dataset|results|plotdata|github|no_results]"
         exit 1
         ;;
 esac
