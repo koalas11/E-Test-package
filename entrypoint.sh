@@ -1,14 +1,14 @@
 #!/bin/bash
 
 model=${OLLAMA_MODEL}
-EXTRACT_TARGET="${1:-all}"
+EXTRACT_TARGET="${EXTRACT_TARGET:-all}"
 
 bash /app/extract_archives.sh "$EXTRACT_TARGET"
 
 mkdir -p /app/logs
 
-# Start Ollama in the background only if installed
-if command -v ollama >/dev/null 2>&1; then
+ # Start Ollama in the background only if installed and model is set
+if command -v ollama >/dev/null 2>&1 && [ -n "$model" ]; then
     echo "Starting Ollama server..."
     nohup ollama serve > /app/logs/ollama.log 2>&1 &
 
@@ -28,7 +28,11 @@ if command -v ollama >/dev/null 2>&1; then
         echo "$model model already present."
     fi
 else
-    echo "Ollama is not installed. Skipping Ollama startup, you will need to specify your ollama host."
+    if ! command -v ollama >/dev/null 2>&1; then
+        echo "Ollama is not installed. Skipping Ollama startup. You will need to specify your Ollama host."
+    elif [ -z "$model" ]; then
+        echo "OLLAMA_MODEL is not set. Skipping Ollama startup. You will need to specify your Ollama host."
+    fi
 fi
 
 # Activate the virtual environment explicitly (safety measure)

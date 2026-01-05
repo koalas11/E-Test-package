@@ -12,8 +12,8 @@ ENV TZ=America/Los_Angeles
 # Install system dependencies
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        curl git tar \
-        subversion perl perl-modules perl-base build-essential libperl-dev cpanminus \
+        bash curl git unzip \
+        subversion perl build-essential cpanminus \
         openjdk-11-jre-headless \
         python3.13 python3.13-venv python3-pip && \
     ln -sf /usr/bin/python3.13 /usr/bin/python && \
@@ -49,34 +49,27 @@ COPY extract_archives.sh .
 RUN chmod +x extract_archives.sh && \
     chmod +x /entrypoint.sh
 
-# Arguments
-# You can override this with -e OLLAMA_MODEL="..." in docker run
-ENV OLLAMA_MODEL="llama3.2:1b"
-
-# Install Ollama only if enabled
-ARG OLLAMA_INSTALL=true
-RUN if [ "$OLLAMA_INSTALL" = "true" ]; then \
-        curl -fsSL https://ollama.com/install.sh | sh; \
-    else \
-        echo "Ollama installation skipped (OLLAMA_INSTALL=$OLLAMA_INSTALL)"; \
-    fi
-
 COPY AutonomicTester AutonomicTester
 COPY DataAnalysis DataAnalysis
 
-# Open a bash shell to run the specific Python commands manually
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/bin/bash"]
 
-FROM base AS no_results
+# --- Ollama Layer ---
+FROM base AS base_with_ollama
+# Arguments
+# You can override this with -e OLLAMA_MODEL="..." in docker run
+ENV OLLAMA_MODEL="llama3.2:1b"
+RUN curl -fsSL https://ollama.com/install.sh | sh; 
 
-WORKDIR /app
-COPY Archives/dataset Archives/dataset
-
-ENTRYPOINT ["/entrypoint.sh no_results"]
-
-FROM base AS with_results
-
+# --- No Ollama ---
+FROM base AS no_ollama
 WORKDIR /app
 COPY Archives Archives
+ENV EXTRACT_TARGET="all"
 
-ENTRYPOINT ["/entrypoint.sh all"]
+# --- With Ollama ---
+FROM base_with_ollama AS with_ollama
+WORKDIR /app
+COPY Archives Archives
+ENV EXTRACT_TARGET="all"
