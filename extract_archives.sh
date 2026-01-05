@@ -51,6 +51,7 @@ extract_plotdata() {
     cd - > /dev/null
 }
 
+# Extract GitHub repos and Llama tokenizer
 extract_github() {
     if [ -d "DataAnalysis/GitHubRepos" ] || [ -f "DataAnalysis/GitHubRepos.tar.gz" ]; then
         echo "GitHub repos already extracted. Skipping."
@@ -60,6 +61,7 @@ extract_github() {
     GITHUB_REPOS_DIR="DataAnalysis"
     mkdir -p $GITHUB_REPOS_DIR
     tar -xzf "Archives/GitHubRepos.tar.gz" -C $GITHUB_REPOS_DIR
+    tar -xzf "Archives/meta-llama-Llama-3.2-1B.tar.gz" -C .
 }
 
 mkdir -p $RESULTS_DIR
