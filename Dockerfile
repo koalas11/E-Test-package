@@ -55,12 +55,23 @@ COPY DataAnalysis DataAnalysis
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/bin/bash"]
 
+FROM ollama/ollama:0.13.5-rocm AS ollama_amd
+FROM ollama/ollama:0.13.5 AS ollama_nvidia
+
 # --- Ollama Layer ---
-FROM base AS base_with_ollama
+FROM base AS base_with_ollama_amd
 # Arguments
 # You can override this with -e OLLAMA_MODEL="..." in docker run
 ENV OLLAMA_MODEL="llama3.2:1b"
-RUN curl -fsSL https://ollama.com/install.sh | sh; 
+COPY --from=ollama_amd /usr/bin/ollama /usr/bin/ollama
+COPY --from=ollama_amd /usr/lib/ollama /usr/lib/ollama
+
+FROM base AS base_with_ollama_nvidia
+# Arguments
+# You can override this with -e OLLAMA_MODEL="..." in docker run
+ENV OLLAMA_MODEL="llama3.2:1b"
+COPY --from=ollama_nvidia /usr/bin/ollama /usr/bin/ollama
+COPY --from=ollama_nvidia /usr/lib/ollama /usr/lib/ollama
 
 # --- No Ollama ---
 FROM base AS no_ollama
@@ -69,7 +80,12 @@ COPY Archives Archives
 ENV EXTRACT_TARGET="all"
 
 # --- With Ollama ---
-FROM base_with_ollama AS with_ollama
+FROM base_with_ollama_amd AS with_ollama_amd
+WORKDIR /app
+COPY Archives Archives
+ENV EXTRACT_TARGET="all"
+
+FROM base_with_ollama_nvidia AS with_ollama_nvidia
 WORKDIR /app
 COPY Archives Archives
 ENV EXTRACT_TARGET="all"
