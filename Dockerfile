@@ -8,6 +8,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 
 # Set timezone for defects4j
 ENV TZ=America/Los_Angeles
+ENV LOGS_DIR=/app/logs
 
 # Install system dependencies
 RUN apt-get update && \

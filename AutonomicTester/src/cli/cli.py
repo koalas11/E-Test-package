@@ -1,4 +1,5 @@
 import argparse
+import logging
 
 from src.rag.index_format import IndexFormat
 from src.cli.command import fine_tune, generate_prompts, prompt_llm, query_llm_with_rag, summarize_answers
@@ -7,6 +8,14 @@ from src.prompt.prompt_kind import PromptKind
 from src import EXPERIMENT_RESULTS_PATH
 
 # Shared parser varilables
+logging_parser = argparse.ArgumentParser(add_help=False)
+logging_parser.add_argument(
+    "--log-level",
+    choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL", "NOTSET"],
+    default="NOTSET",
+    help="set the logging level",
+)
+
 version_parser = argparse.ArgumentParser(add_help=False)
 version_parser.add_argument(
     "-v",
@@ -52,7 +61,7 @@ subparsers = main_args_parser.add_subparsers()
 # Functionality for generating prompts
 parser_generate = subparsers.add_parser(
     "generate",
-    parents=[version_parser, project_parser, query_parser],
+    parents=[version_parser, project_parser, query_parser, logging_parser],
     help="generate prompting texts from extracted testing components and save to the prompts folder",
 )
 parser_generate.set_defaults(func=generate_prompts)
@@ -61,7 +70,7 @@ parser_generate.set_defaults(func=generate_prompts)
 
 parser_finetune = subparsers.add_parser(
     "finetune",
-    parents=[version_parser, project_parser],
+    parents=[version_parser, project_parser, logging_parser],
     help="fine-tune GPT-3.5 Turbo",
 )
 parser_finetune.add_argument(
@@ -91,7 +100,7 @@ parser_finetune.set_defaults(func=fine_tune)
 # Functionality for prompting LLMs
 parser_prompt = subparsers.add_parser(
     "prompt",
-    parents=[version_parser, dataset_parser, project_parser, query_parser],
+    parents=[version_parser, dataset_parser, project_parser, query_parser, logging_parser],
     help="prompt LLMs with predefined questions",
 )
 parser_prompt.add_argument(
@@ -147,7 +156,7 @@ parser_prompt.set_defaults(func=prompt_llm)
 # Functionality for querying LLMs with RAG
 parser_rag_query = subparsers.add_parser(
     "ragquery",
-    parents=[version_parser, dataset_parser, project_parser, query_parser],
+    parents=[version_parser, dataset_parser, project_parser, query_parser, logging_parser],
     help="query LLMs with RAG",
 )
 parser_rag_query.add_argument(
@@ -182,7 +191,7 @@ parser_rag_query.set_defaults(func=query_llm_with_rag)
 # Functionality for summarizing answers from LLMs
 parser_summarize = subparsers.add_parser(
     "summarize",
-    parents=[version_parser, query_parser],
+    parents=[version_parser, query_parser, logging_parser],
     help="summarize answers from the LLM",
 )
 parser_summarize.add_argument(

@@ -5,12 +5,12 @@ EXTRACT_TARGET="${EXTRACT_TARGET:-all}"
 
 bash /app/extract_archives.sh "$EXTRACT_TARGET"
 
-mkdir -p /app/logs
+mkdir -p $LOGS_DIR
 
  # Start Ollama in the background only if installed and model is set
 if command -v ollama >/dev/null 2>&1 && [ -n "$model" ]; then
     echo "Starting Ollama server..."
-    nohup ollama serve > /app/logs/ollama.log 2>&1 &
+    nohup ollama serve > $LOGS_DIR/ollama.log 2>&1 &
 
     # Wait for the Ollama server to wake up
     echo "Waiting for Ollama to be ready..."
@@ -40,7 +40,7 @@ source /opt/venv/bin/activate
 
 # Launch Jupyter Lab
 nohup jupyter lab --notebook-dir=/app/DataAnalysis --ip=0.0.0.0 --allow-root \
-    --no-browser --NotebookApp.token='' > /app/logs/jupyter.log 2>&1 &
+    --no-browser --NotebookApp.token='' > $LOGS_DIR/jupyter.log 2>&1 &
 
 # Print the Access Info
 echo "-----------------------------------------------------"

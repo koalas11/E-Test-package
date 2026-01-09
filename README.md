@@ -32,8 +32,11 @@ This artifact contains the environment, code, and data required to fully replica
 ```sh
 export HUGGING_FACE_API_KEY="YOUR API KEY"
 
-# Choice 1: Build the image locally
-docker build -t e-test-env .
+# Choice 1: Build the image locally depending on the GPU and if you want Ollama in the container
+docker build -t e-test-env:1.0-with-ollama-amd -t e-test-env:latest-with-ollama-amd --target with_ollama_amd .
+docker build -t e-test-env:1.0-with-ollama-nvidia -t e-test-env:latest-with-ollama-nvidia --target with_ollama_nvidia .
+docker build -t e-test-env:1.0-no-ollama -t e-test-env:latest-no-ollama --target no_ollama .
+
 
 # Choice 2: Pull the pre-built image from Docker Hub
 docker pull ketaiq/e-test-env-llama3-1b:v1.0
@@ -46,6 +49,38 @@ docker tag e-test-env-llama3-1b-amd64 e-test-env
 
 **Step 2. Run the Docker container**
 
+With ollama pre-installed:
+
+Linux:
+```sh
+docker run -it --rm \
+  -p 20268:8888 \
+  --device /dev/kfd --device /dev/dri \
+  -v $(pwd)/experiment_results:/app/AutonomicTester/experiment_results \
+  -v $(pwd)/logs:/app/logs \
+  -e HUGGING_FACE_API_KEY=$HUGGING_FACE_API_KEY \
+  -e OLLAMA_MODEL="llama3.2:1b" \
+  e-test-env:1.0-with-ollama-amd
+```
+
+If using an NVIDIA GPU, replace `--device /dev/kfd --device /dev/dri` with `--gpus=all`, then install the NVIDIA Container Toolkit and replace `e-test-env:*-with-ollama-amd` with `e-test-env:*-with-ollama-nvidia`.
+
+The image `e-test-env:*-with-ollama-amd` only works in linux if you want to use an AMD GPU.
+
+Windows:
+```sh
+docker run -it --rm ^
+  -p 20268:8888 ^
+  --gpus=all ^
+  -v "%cd%\experiment_results":/app/AutonomicTester/experiment_results ^
+  -v "%cd%\logs":/app/logs ^
+  -e HUGGING_FACE_API_KEY=%HUGGING_FACE_API_KEY% ^
+  -e OLLAMA_MODEL="llama3.2:1b" ^
+  e-test-env:1.0-with-ollama-nvidia
+```
+
+Without ollama pre-installed:
+
 Linux/Mac:
 ```sh
 docker run -it --rm \
@@ -53,8 +88,7 @@ docker run -it --rm \
   -v $(pwd)/experiment_results:/app/AutonomicTester/experiment_results \
   -v $(pwd)/logs:/app/logs \
   -e HUGGING_FACE_API_KEY=$HUGGING_FACE_API_KEY \
-  -e OLLAMA_MODEL="llama3.2:1b" \
-  e-test-env
+  e-test-env:1.0-no-ollama
 ```
 
 Windows:
@@ -64,8 +98,7 @@ docker run -it --rm ^
   -v "%cd%\experiment_results":/app/AutonomicTester/experiment_results ^
   -v "%cd%\logs":/app/logs ^
   -e HUGGING_FACE_API_KEY=%HUGGING_FACE_API_KEY% ^
-  -e OLLAMA_MODEL="llama3.2:1b" ^
-  e-test-env
+  e-test-env:1.0-no-ollama
 ```
 
 ### Data Analysis
@@ -88,6 +121,9 @@ python AutonomicTester/main.py prompt -v 4 -d Defects4J -m LLama3_2_1B -s BUGGY
 
 # Test Llama3 1B with prompts generated from error-prone scenarios in Defects4J with Test Case Generation On
 python AutonomicTester/main.py prompt -v 4 -d Defects4J -m LLama3_2_1B -s BUGGY -tcg on
+
+# Test Llama3 1B with prompts generated from error-prone scenarios in Defects4J with Test Case Generation On and ollama not present in the container (example with host pc having ollama installed)
+python AutonomicTester/main.py prompt -v 4 -d Defects4J -m LLama3_2_1B -s BUGGY -tcg on --host http://host.docker.internal:11434
 ```
 
 For other settings mentioned in the paper, please check the help message via `python AutonomicTester/main.py -h`.
